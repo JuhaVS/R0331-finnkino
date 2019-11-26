@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<style>
+/* bodyn taustaväri*/
+body {
+background-color: #ffffff;
+}
+
+/* Koko divin ominaisuudet */
+#divi {
+  background-color: #ffffff;
+  padding: 30px 40px;
+  color: black;
+  text-align: center;
+  height: 890px;
+  height: 100%;
+
+	}
+}
+/* Alastulopalkin ominaisuudet */
+#city{
+	width: 200px;
+}
+/* Divin johon elokuvat tulevat ominaisuudet */
+#tietoa {
+position:	absolute;
+top: 200px;
+left: 580px;
+}
+/*tablen ominaisuudet */
+table, tr, td{
+  border: 1px solid black;
+	font-size: 20px;
+	color: black;
+}
+
+	</style>
+	<script>
+	/* functio joka tuo alasveto palkkiin teatterien nimet */
+	function updateData(){
+		var xmlhttp = new XMLHttpRequest();
+	xmlhttp.open("GET", "https://www.finnkino.fi/xml/TheatreAreas/",true);
+	xmlhttp.send();
+
+	xmlhttp.onreadystatechange=function() {
+
+		if(xmlhttp.readyState==4 && xmlhttp.status==200){
+			var tiedot = xmlhttp.responseXML;
+
+			var nimet= tiedot.getElementsByTagName("Name");
+			var id = tiedot.getElementsByTagName("ID");
+
+			for (var i = 0; i < nimet.length; i++) {
+				var elementti = document.createElement('option');
+						 elementti.text =  nimet[i].innerHTML;
+						 elementti.value = id[i].innerHTML;
+						 document.getElementById("city").add(elementti);
+			}
+		}
+	}
+
+
+
+}
+
+/* functio joka tuo diviin tietoa elokuvat kun alasvetopalkista valitaan teatteri*/
+
+			function päivitä(){
+
+			var paikka = document.getElementById('city').value;
+			var x = "https://www.finnkino.fi/xml/Schedule/?area=";
+			url = x + paikka;
+
+			var xmlhttp = new XMLHttpRequest();
+			xmlhttp.open("GET", url , true);
+			xmlhttp.send();
+		  xmlhttp.onreadystatechange=function() {
+				if(xmlhttp.readyState==4 && xmlhttp.status==200){
+					var tiedot = xmlhttp.responseXML;
+					var elokuvat = tiedot.getElementsByTagName("Title");
+					var kuvat = tiedot.getElementsByTagName("EventSmallImagePortrait");
+					var pituus = tiedot.getElementsByTagName("LengthInMinutes");
+					var genre = tiedot.getElementsByTagName("Genres");
+					var kieli = tiedot.getElementsByTagName("PresentationMethodAndLanguage");
+					var alku = tiedot.getElementsByTagName("dttmShowStart");
+					var images = tiedot.getElementsByTagName("EventLargeImagePortrait");
+
+					var txt = "<table>";
+					for(var i = 0; i < elokuvat.length; i++) {
+							txt += "<tr><td>" + elokuvat[i].childNodes[0].nodeValue  + "<br>(" + pituus[i].childNodes[0].nodeValue +" Minuuttia)<br>Näytös:<br>"+ alku[i].childNodes[0].nodeValue  + "</td>"+
+										 "<td>"    + "<img src="+ kuvat[i].childNodes[0].nodeValue + ">" +  "</td>" +
+										 "<td>"   + kieli[i].childNodes[0].nodeValue  + "<br>" + genre[i].childNodes[0].nodeValue +  "</td></tr>";
+
+							console.log(txt);
+					}
+					txt += "</table>";
+
+					document.getElementById("tietoa").innerHTML = txt;
+
+		}
+	}
+}
+
+	</script>
+	</head>
+	<body onload="updateData();">
+		<div id="divi">
+		<h1>Valitse elokuvateatteri</h1>
+
+
+		<div id="myDiv">
+			<select name="mySelect" id="city" onchange="päivitä()">
+
+		  </select>
+		</div>
+
+<div id="tietoa">
+
+</div>
+
+	</div>
+	</body>
+</html>
